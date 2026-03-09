@@ -19,9 +19,10 @@ public class Main {
             int menuAwal = sc.nextInt();
 
             if (menuAwal == 1) {
-                System.out.print("Username: "); String user = sc.next();
-                System.out.print("Password: "); String pass = sc.next();
-                
+                sc.nextLine();
+                System.out.print("Username: "); String user = sc.nextLine();
+                System.out.print("Password: "); String pass = sc.nextLine();
+
                 Akun logedIn = null;
                 for (Akun a : daftarAkun) {
                     if (a.username.equals(user) && a.password.equals(pass)) {
@@ -37,7 +38,7 @@ public class Main {
                         int pAdmin;
                         do {
                             System.out.println("\n--- MENU ADMIN ---");
-                            System.out.println("1. Tambah Billing (Auto ID)");
+                            System.out.println("1. Tambah Billing");
                             System.out.println("2. Tampilkan Semua Billing");
                             System.out.println("3. Update Durasi");
                             System.out.println("4. Hapus Billing");
@@ -46,25 +47,26 @@ public class Main {
                             pAdmin = sc.nextInt();
 
                             if (pAdmin == 1) {
-                                // ID TIDAK DIINPUT MANUAL LAGI
-                                System.out.print("Nama Pelanggan: "); String nama = sc.next();
+                                sc.nextLine(); 
+                                System.out.print("Nama Pelanggan: "); String nama = sc.nextLine();
                                 System.out.print("Nomor PC: "); int pc = sc.nextInt();
                                 
-                                // Validasi PC oleh Admin
-                                boolean pcTersedia = true;
-                                for (Billing b : daftarBilling) {
-                                    if (b.nomorPC == pc) { pcTersedia = false; break; }
-                                }
-
-                                if (pcTersedia) {
-                                    System.out.print("Durasi: "); int dur = sc.nextInt();
-                                    // Panggil constructor yang baru (3 parameter saja)
-                                    daftarBilling.add(new Billing(nama, pc, dur));
-                                    System.out.println("Billing berhasil ditambahkan!");
+                                if (pc < 1 || pc > 10) {
+                                    System.out.println("Gagal! Nomor PC tidak valid. Hanya tersedia PC 1-10.");
                                 } else {
-                                    System.out.println("Gagal! PC sedang digunakan.");
-                                }
+                                    boolean pcTersedia = true;
+                                    for (Billing b : daftarBilling) {
+                                        if (b.nomorPC == pc) { pcTersedia = false; break; }
+                                    }
 
+                                    if (pcTersedia) {
+                                        System.out.print("Durasi: "); int dur = sc.nextInt();
+                                        daftarBilling.add(new Billing(nama, pc, dur));
+                                        System.out.println("Billing berhasil ditambahkan!");
+                                    } else {
+                                        System.out.println("Gagal! PC sedang digunakan.");
+                                    }
+                                }
                             } else if (pAdmin == 2) {
                                 if (daftarBilling.isEmpty()) {
                                     System.out.println("Belum ada pelanggan yang menyewa PC.");
@@ -108,35 +110,50 @@ public class Main {
 
                     } else {
                         int pUser;
-                        do {
-                            System.out.println("\n--- MENU PELANGGAN ---");
-                            System.out.println("1. Sewa PC (Tambah Billing)");
-                            System.out.println("2. Lihat Billing Saya");
-                            System.out.println("3. Logout");
-                            System.out.print("Pilih: ");
-                            pUser = sc.nextInt();
+    do {
+        System.out.println("\n--- MENU PELANGGAN ---");
+        System.out.println("1. Sewa PC (Tambah Billing)");
+        System.out.println("2. Lihat Billing Saya");
+        System.out.println("3. Logout");
+        System.out.print("Pilih: ");
+        pUser = sc.nextInt();
 
-                            if (pUser == 1) {
-                                System.out.print("Nomor PC yang ingin disewa: ");
-                                int pcInput = sc.nextInt();
-                                
-                                boolean pcTersedia = true;
-                                for (Billing b : daftarBilling) {
-                                    if (b.nomorPC == pcInput) {
-                                        pcTersedia = false;
-                                        break;
-                                    }
-                                }
+        if (pUser == 1) {
+            boolean sudahSewa = false;
+            for (Billing b : daftarBilling) {
+                if (b.namaPelanggan.equals(logedIn.username)) {
+                    sudahSewa = true;
+                    break;
+                }
+            }
 
-                                if (pcTersedia) {
-                                    System.out.print("Durasi (Jam): ");
-                                    int durInput = sc.nextInt();
-                                    // Menggunakan constructor yang sama dengan Admin
-                                    daftarBilling.add(new Billing(logedIn.username, pcInput, durInput));
-                                    System.out.println("Berhasil menyewa PC #" + pcInput);
-                                } else {
-                                    System.out.println("Maaf, PC #" + pcInput + " sedang digunakan!");
-                                }
+            if (sudahSewa) {
+                System.out.println("Gagal! Kamu masih memiliki billing aktif. Selesaikan dulu sewa sebelumnya.");
+            } else {
+                System.out.print("Nomor PC yang ingin disewa (1-10): ");
+                int pcInput = sc.nextInt();
+
+                if (pcInput < 1 || pcInput > 10) {
+                    System.out.println("Gagal! Nomor PC tidak valid. Hanya tersedia PC 1-10.");
+                } else {
+                    boolean pcTersedia = true;
+                    for (Billing b : daftarBilling) {
+                        if (b.nomorPC == pcInput) {
+                            pcTersedia = false;
+                            break;
+                        }
+                    }
+
+                    if (pcTersedia) {
+                        System.out.print("Durasi (Jam): ");
+                        int durInput = sc.nextInt();
+                        daftarBilling.add(new Billing(logedIn.username, pcInput, durInput));
+                        System.out.println("Berhasil menyewa PC #" + pcInput);
+                    } else {
+                        System.out.println("Maaf, PC #" + pcInput + " sedang digunakan pelanggan lain!");
+                    }
+                }
+            }
                             } else if (pUser == 2) {
                                 boolean ada = false;
                                 for (Billing b : daftarBilling) {
@@ -154,10 +171,25 @@ public class Main {
                 }
 
             } else if (menuAwal == 2) {
-                System.out.print("Username Baru: "); String uBaru = sc.next();
-                System.out.print("Password Baru: "); String pBaru = sc.next();
-                daftarAkun.add(new Akun(uBaru, pBaru, "pelanggan"));
-                System.out.println("Registrasi Berhasil!");
+                sc.nextLine();
+                System.out.print("Masukkan Username Baru: "); String uBaru = sc.nextLine();
+                
+                boolean usernameExist = false;
+                for (Akun a : daftarAkun) {
+                    if (a.username.equalsIgnoreCase(uBaru)) { 
+                        usernameExist = true;
+                        break;
+                    }
+                }
+
+                if (usernameExist) {
+                    System.out.println("Gagal! Username sudah digunakan. Silakan cari nama lain.");
+                } else {
+                    System.out.print("Masukkan Password Baru: "); 
+                    String pBaru = sc.nextLine();
+                    daftarAkun.add(new Akun(uBaru, pBaru, "pelanggan"));
+                    System.out.println("Registrasi Berhasil! Silakan Login.");
+                }
             } else if (menuAwal == 3) {
                 System.out.println("Terima Kasih Telah Menggunakan Sistem Kami!");
                 break;
